@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Activity - Start Up Early</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background like in screenshots */
+        }
+        .form-progress-item.active {
+            background-color: #e9d5ff; /* Light purple */
+            color: #5b21b6; /* Darker purple */
+            font-weight: 600;
+        }
+        .form-progress-item.active .progress-circle {
+            background-color: #5b21b6; /* Darker purple */
+            color: white;
+        }
+        .progress-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            font-size: 0.875rem;
+            border: 1px solid #d1d5db;
+        }
+        .form-progress-item.completed .progress-circle {
+            background-color: #34d399; /* Green for completed */
+            border-color: #34d399;
+            color: white;
+        }
+        .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #e5e7eb;
+            color: #6b7280;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: help;
+        }
+        /* Custom file input */
+        .custom-file-input::-webkit-file-upload-button {
+            visibility: hidden;
+        }
+        .custom-file-input::before {
+            content: 'Choose File';
+            display: inline-block;
+            background: #f3f4f6; /* Light gray */
+            border: 1px solid #d1d5db; /* Gray border */
+            border-radius: 0.375rem; /* Rounded corners */
+            padding: 0.5rem 1rem;
+            outline: none;
+            white-space: nowrap;
+            -webkit-user-select: none;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: #374151; /* Dark gray text */
+        }
+        .custom-file-input:hover::before {
+            border-color: #9ca3af;
+        }
+        .custom-file-input:active::before {
+            background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
+        }
+        .form-input, .form-select, .form-textarea {
+            border-color: #d1d5db;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: #6366f1; /* Indigo */
+            box-shadow: 0 0 0 1px #6366f1;
+        }
+        .primary-btn {
+            background-color: #5b21b6; /* Purple */
+            color: white;
+        }
+        .primary-btn:hover {
+            background-color: #4c1d95; /* Darker Purple */
+        }
+        .secondary-btn {
+            background-color: #e5e7eb; /* Light Gray */
+            color: #374151; /* Dark Gray text */
+        }
+        .secondary-btn:hover {
+            background-color: #d1d5db; /* Gray */
+        }
+        .danger-btn {
+            background-color: #ef4444; /* Red */
+            color: white;
+        }
+        .danger-btn:hover {
+            background-color: #dc2626; /* Darker Red */
+        }
+        /* Chatbot placeholder styles */
+        .chat-message {
+            padding: 8px 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background-color: #5b21b6; /* Purple */
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 0px;
+        }
+        .bot-message {
+            background-color: #e5e7eb; /* Light gray */
+            color: #1f2937; /* Dark gray text */
+            align-self: flex-start;
+            border-bottom-left-radius: 0px;
+        }
+        /* Quick Entry List Styles */
+        .quick-entry-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr) auto; /* Adjust for more fields */
+            gap: 0.75rem; /* 12px */
+            align-items: end; /* Align items to the bottom for button alignment */
+            padding: 0.75rem;
+            border-bottom: 1px solid #e5e7eb; /* Light gray border */
+        }
+         @media (min-width: 768px) { /* md breakpoint */
+            .quick-entry-row {
+                /* Activity Name (larger), Type, Activity Type, Start, End, Remove button */
+                grid-template-columns: 2fr 1.5fr 1.5fr 1fr 1fr auto;
+            }
+        }
+
+    </style>
+</head>
+<body class="flex min-h-screen">
+    <!-- Sidebar (Mimicking the layout) -->
+    <div class="w-64 bg-white p-6 shadow-lg hidden md:flex flex-col">
+        <div class="mb-10">
+            <img src="https://placehold.co/150x40/6724F5/FFFFFF?text=StartUpEarly&font=inter" alt="Start Up Early Logo" class="h-8">
+        </div>
+        <nav class="space-y-2">
+            <a href="#" class="block px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100">Dashboard</a>
+            <a href="#" class="block px-4 py-2 text-purple-600 bg-purple-100 font-semibold rounded-md">Add Activity</a>
+            <a href="#" class="block px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100">Timeline</a>
+            <a href="#" class="block px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100">CCAs</a>
+            <a href="#" class="block px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100">Events</a>
+            <a href="#" class="block px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100">My Attendance</a>
+            <a href="#" class="block px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100">Calendar</a>
+            <a href="#" class="block px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100">Portal Links</a>
+            <a href="#" class="block px-4 py-2 text-gray-700 rounded-md hover:bg-gray-100">Resources</a>
+        </nav>
+        <div class="mt-auto">
+             <button class="w-full flex items-center justify-center px-4 py-2 text-purple-600 border border-purple-600 rounded-md hover:bg-purple-50">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                </svg>
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 p-4 md:p-8 overflow-y-auto">
+        <div id="initialChoiceView" class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-xl">
+            <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">How would you like to add your activities?</h1>
+            
+            <div class="mb-8 p-6 border border-gray-200 rounded-lg">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Add a Single Activity</h2>
+                <p class="text-sm text-gray-500 mb-4">Ideal for one or two entries, or when you want to provide full details right away.</p>
+                <div class="space-y-3">
+                    <button onclick="showView('formView')" class="w-full primary-btn py-2.5 px-4 rounded-md text-sm font-medium">Use Guided Form</button>
+                    <button onclick="showView('chatbotView')" class="w-full secondary-btn py-2.5 px-4 rounded-md text-sm font-medium border border-gray-300">Chat with AI Assistant</button>
+                </div>
+            </div>
+
+            <div class="p-6 border border-gray-200 rounded-lg">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Add Multiple Activities</h2>
+                <p class="text-sm text-gray-500 mb-4">Save time by adding several activities at once.</p>
+                <div class="space-y-3">
+                    <button onclick="showView('quickEntryView')" class="w-full secondary-btn py-2.5 px-4 rounded-md text-sm font-medium border border-gray-300">Quick Entry List</button>
+                    <button onclick="alert('AI-Powered Batch Input feature coming soon!')" class="w-full secondary-btn py-2.5 px-4 rounded-md text-sm font-medium border border-gray-300">AI-Powered Batch Input</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form View Container -->
+        <div id="formView" class="hidden">
+            <!-- This is Step 1 from the original screenshots -->
+            <div id="formStep0" class="bg-white p-6 md:p-8 rounded-lg shadow-xl mb-6">
+                 <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-1">Select Experience Type & Activity</h2>
+                 <p class="text-gray-600 mb-6 text-sm">Help us understand the nature of your activity by selecting the type of experience and its category.</p>
+                
+                <div class="mb-4">
+                    <label for="experienceType" class="block text-sm font-medium text-gray-700 mb-1">Select experience type <span class="info-icon">i</span></label>
+                    <select id="experienceType" name="experienceType" class="form-select mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                        <option>Event/Activity Participation</option>
+                        <option>Internship</option>
+                        <option>Project</option>
+                        <option>Club Membership</option>
+                        <option>Volunteering</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label for="activityType" class="block text-sm font-medium text-gray-700 mb-1">Activity Type <span class="info-icon">i</span></label>
+                    <select id="activityType" name="activityType" class="form-select mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                        <option>Fundraising for Medical Research</option>
+                        <option>Debate Competition</option>
+                        <option>Science Fair</option>
+                        <option>Sports Tournament</option>
+                    </select>
+                </div>
+                <div class="flex justify-end">
+                    <button onclick="nextFormStep()" class="primary-btn py-2 px-6 rounded-md text-sm font-medium">Next Step</button>
+                </div>
+            </div>
+
+            <!-- This is the main multi-step form area (Steps 1-7 from screenshots) -->
+            <div id="mainFormArea" class="hidden bg-white p-6 md:p-8 rounded-lg shadow-xl">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <!-- Form Progress Indicator -->
+                    <div class="w-full md:w-1/4 bg-purple-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-purple-700 mb-4">Form progress</h3>
+                        <p class="text-xs text-purple-500 mb-4">Indicators for form progress</p>
+                        <nav class="space-y-1">
+                            <a href="#" id="progress-1" class="form-progress-item flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-md" onclick="goToFormStep(1); return false;">
+                                <span class="progress-circle">1</span> Activity
+                            </a>
+                            <a href="#" id="progress-2" class="form-progress-item flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-md" onclick="goToFormStep(2); return false;">
+                                <span class="progress-circle">2</span> Duration
+                            </a>
+                            <a href="#" id="progress-3" class="form-progress-item flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-md" onclick="goToFormStep(3); return false;">
+                                <span class="progress-circle">3</span> Scope
+                            </a>
+                            <a href="#" id="progress-4" class="form-progress-item flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-md" onclick="goToFormStep(4); return false;">
+                                <span class="progress-circle">4</span> Engagement
+                            </a>
+                            <a href="#" id="progress-5" class="form-progress-item flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-md" onclick="goToFormStep(5); return false;">
+                                <span class="progress-circle">5</span> Role
+                            </a>
+                             <a href="#" id="progress-6" class="form-progress-item flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-md" onclick="goToFormStep(6); return false;">
+                                <span class="progress-circle">6</span> Grade
+                            </a>
+                            <a href="#" id="progress-7" class="form-progress-item flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-md" onclick="goToFormStep(7); return false;">
+                                <span class="progress-circle">7</span> Overview
+                            </a>
+                        </nav>
+                    </div>
+
+                    <!-- Form Steps Content -->
+                    <div class="w-full md:w-3/4">
+                        <div id="formStep1" class="form-step">
+                            <h2 class="text-xl font-bold text-gray-800 mb-1">Your Activity</h2>
+                            <p class="text-gray-600 mb-6 text-sm">Now let's get into the specifics! Tell us more about the activity you were involved in and your role in making it happen.</p>
+                            
+                            <div class="mb-4">
+                                <label for="activityName" class="block text-sm font-medium text-gray-700 mb-1">Activity Name <span class="info-icon">i</span></label>
+                                <input type="text" id="activityName" name="activityName" class="form-input mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm" placeholder="Enter Activity Name" maxlength="50">
+                                <p class="text-xs text-gray-500 mt-1 text-right"><span id="activityNameCount">0</span>/50</p>
+                            </div>
+                            <div class="mb-4">
+                                <label for="activityDetails" class="block text-sm font-medium text-gray-700 mb-1">Activity Details (optional) <span class="info-icon">i</span></label>
+                                <textarea id="activityDetails" name="activityDetails" rows="3" class="form-textarea mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm" placeholder="Write activity details" maxlength="200"></textarea>
+                                <p class="text-xs text-gray-500 mt-1 text-right"><span id="activityDetailsCount">0</span>/200</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Upload Proof (optional) <span class="info-icon">i</span></label>
+                                <div class="mt-1 flex items-center">
+                                    <input type="file" id="activityProof" name="activityProof" class="custom-file-input text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                                    <span id="fileName" class="ml-3 text-sm text-gray-500">No file chosen</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="formStep2" class="form-step hidden">
+                            <h2 class="text-xl font-bold text-gray-800 mb-1">Time Frame</h2>
+                            <p class="text-gray-600 mb-6 text-sm">Let us know when your activity took place. Duration helps us understand your level of commitment and involvement.</p>
+                            <div class="mb-4">
+                                <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Select Start Date <span class="info-icon">i</span></label>
+                                <input type="date" id="startDate" name="startDate" class="form-input mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm">
+                            </div>
+                            <div>
+                                <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">Select End Date <span class="info-icon">i</span></label>
+                                <input type="date" id="endDate" name="endDate" class="form-input mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm">
+                            </div>
+                        </div>
+
+                        <div id="formStep3" class="form-step hidden">
+                            <h2 class="text-xl font-bold text-gray-800 mb-1">Impact</h2>
+                            <p class="text-gray-600 mb-6 text-sm">Tell us how far your activity reached! Did it make a difference at your school, in your community, or on a global scale?</p>
+                            <div class="mb-4">
+                                <label for="scope" class="block text-sm font-medium text-gray-700 mb-1">Scope <span class="info-icon">i</span></label>
+                                <select id="scope" name="scope" class="form-select mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm">
+                                    <option>Choose Scope</option>
+                                    <option>Section</option>
+                                    <option>Class</option>
+                                    <option>School</option>
+                                    <option>Local</option>
+                                    <option>Region</option>
+                                    <option>State/Province</option>
+                                    <option>National</option>
+                                    <option>International</option>
+                                    <option>Global</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="formStep4" class="form-step hidden">
+                            <h2 class="text-xl font-bold text-gray-800 mb-1">Effort</h2>
+                            <p class="text-gray-600 mb-6 text-sm">How much time and energy did you dedicate to this activity? The more effort, the higher the impact!</p>
+                            <div class="mb-4">
+                                <label for="engagement" class="block text-sm font-medium text-gray-700 mb-1">Engagement <span class="info-icon">i</span></label>
+                                <select id="engagement" name="engagement" class="form-select mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm">
+                                    <option>Choose Engagement</option>
+                                    <option>Low - (1-2 Hours) / week</option>
+                                    <option>Moderate - (3-5 Hours) / week</option>
+                                    <option>Heavy - (4-6 Hours) / week</option>
+                                    <option>Extra - (7+ Hours) / week</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="formStep5" class="form-step hidden">
+                            <h2 class="text-xl font-bold text-gray-800 mb-1">Your Role</h2>
+                            <p class="text-gray-600 mb-6 text-sm">What was your position in this activity? Tell us if you were a participant, leader, or played another key role.</p>
+                            <div id="roleContent" class="p-4 bg-gray-50 rounded-md text-sm text-gray-700">
+                                <!-- Role content will be dynamically updated based on activity type. Placeholder for now. -->
+                                No specific roles are available for this activity type. Your participation will be recorded as a standard participant.
+                                <input type="text" id="roleInput" name="roleInput" class="form-input mt-2 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm hidden" placeholder="Specify your role">
+                            </div>
+                        </div>
+
+                        <div id="formStep6" class="form-step hidden">
+                            <h2 class="text-xl font-bold text-gray-800 mb-1">Grade Level</h2>
+                            <p class="text-gray-600 mb-6 text-sm">Let us know which grade you were in when you participated in this activity. It helps us understand your academic context.</p>
+                            <div class="mb-4">
+                                <label for="grade" class="block text-sm font-medium text-gray-700 mb-1">Add Grade <span class="info-icon">i</span></label>
+                                <input type="number" id="grade" name="grade" class="form-input mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm" placeholder="e.g., 10">
+                            </div>
+                        </div>
+
+                        <div id="formStep7" class="form-step hidden">
+                            <h2 class="text-xl font-bold text-gray-800 mb-1">Review</h2>
+                            <p class="text-gray-600 mb-6 text-sm">Take a moment to review all the details you've provided. Make sure everything is accurate before submitting!</p>
+                            <div id="reviewContent" class="space-y-3 text-sm">
+                                <!-- Review details will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Navigation Buttons -->
+                        <div class="mt-8 flex justify-between">
+                            <button id="backButton" onclick="prevFormStep()" class="secondary-btn py-2 px-6 rounded-md text-sm font-medium">Back</button>
+                            <button id="nextButton" onclick="nextFormStep()" class="primary-btn py-2 px-6 rounded-md text-sm font-medium">Next Step</button>
+                            <button id="saveButton" onclick="saveActivity()" class="primary-btn py-2 px-6 rounded-md text-sm font-medium hidden">Save Activity</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chatbot View Placeholder -->
+        <div id="chatbotView" class="hidden max-w-lg mx-auto bg-white p-6 rounded-lg shadow-xl">
+            <div class="flex items-center justify-between mb-4 border-b pb-3">
+                <h2 class="text-xl font-semibold text-gray-800">AI Assistant</h2>
+                <button onclick="showView('initialChoiceView')" class="text-sm text-purple-600 hover:text-purple-800">Exit Chat</button>
+            </div>
+            <div id="chatMessages" class="h-96 overflow-y-auto mb-4 p-3 bg-gray-50 rounded-md flex flex-col space-y-2">
+                <div class="chat-message bot-message">
+                    Hi there! I'm your AI assistant. I can help you add your activity. What's the name of the activity you'd like to add?
+                </div>
+                 <div class="chat-message user-message">
+                    Debate Club
+                </div>
+                <div class="chat-message bot-message">
+                    Great! "Debate Club". What type of experience was this? For example, was it a club membership, an event, or something else?
+                </div>
+            </div>
+            <div class="flex">
+                <input type="text" id="chatInput" placeholder="Type your message..." class="form-input flex-1 py-2 px-3 rounded-l-md focus:ring-0">
+                <button onclick="sendChatMessage()" class="primary-btn px-4 rounded-r-md">Send</button>
+            </div>
+             <p class="text-xs text-gray-500 mt-2 text-center">This is a placeholder chatbot. Full functionality coming soon.</p>
+        </div>
+        
+        <!-- Quick Entry List View -->
+        <div id="quickEntryView" class="hidden bg-white p-6 md:p-8 rounded-lg shadow-xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800">Quick Entry for Multiple Activities</h2>
+                <button onclick="showView('initialChoiceView')" class="secondary-btn py-2 px-4 rounded-md text-sm font-medium">Back to Choices</button>
+            </div>
+            <p class="text-gray-600 mb-6 text-sm">Quickly add the basic details for multiple activities below. You can add more details later if needed.</p>
+
+            <div id="quickEntryRowsContainer" class="mb-6 space-y-4">
+                <!-- Activity rows will be added here by JavaScript -->
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <button onclick="addQuickEntryRow()" class="w-full sm:w-auto primary-btn py-2 px-4 rounded-md text-sm font-medium flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Add Another Activity
+                </button>
+                <button onclick="saveAllQuickEntries()" class="w-full sm:w-auto primary-btn bg-green-600 hover:bg-green-700 py-2 px-6 rounded-md text-sm font-medium">Save All Activities</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentView = 'initialChoiceView';
+        let currentFormStep = 0; // 0 for initial type selection, 1-7 for main form
+        const totalFormSteps = 7; // For the main form with progress bar
+        let quickEntryRowCounter = 0;
+
+        const activityData = {
+            experienceType: '',
+            activityType: '',
+            activityName: '',
+            activityDetails: '',
+            activityProof: null,
+            startDate: '',
+            endDate: '',
+            scope: '',
+            engagement: '',
+            role: '',
+            grade: ''
+        };
+
+        // DOM Elements
+        const views = {
+            initialChoiceView: document.getElementById('initialChoiceView'),
+            formView: document.getElementById('formView'),
+            chatbotView: document.getElementById('chatbotView'),
+            quickEntryView: document.getElementById('quickEntryView'), // New view
+            formStep0: document.getElementById('formStep0'), 
+            mainFormArea: document.getElementById('mainFormArea') 
+        };
+        const formSteps = [
+            null, 
+            document.getElementById('formStep1'),
+            document.getElementById('formStep2'),
+            document.getElementById('formStep3'),
+            document.getElementById('formStep4'),
+            document.getElementById('formStep5'),
+            document.getElementById('formStep6'),
+            document.getElementById('formStep7')
+        ];
+        const progressItems = [
+            null,
+            document.getElementById('progress-1'),
+            document.getElementById('progress-2'),
+            document.getElementById('progress-3'),
+            document.getElementById('progress-4'),
+            document.getElementById('progress-5'),
+            document.getElementById('progress-6'),
+            document.getElementById('progress-7')
+        ];
+
+        const backButton = document.getElementById('backButton');
+        const nextButton = document.getElementById('nextButton');
+        const saveButton = document.getElementById('saveButton');
+        const quickEntryRowsContainer = document.getElementById('quickEntryRowsContainer');
+
+
+        // Character counters
+        const activityNameInput = document.getElementById('activityName');
+        const activityNameCount = document.getElementById('activityNameCount');
+        const activityDetailsInput = document.getElementById('activityDetails');
+        const activityDetailsCount = document.getElementById('activityDetailsCount');
+        
+        if(activityNameInput) {
+            activityNameInput.addEventListener('input', () => {
+                activityNameCount.textContent = activityNameInput.value.length;
+            });
+        }
+        if(activityDetailsInput) {
+            activityDetailsInput.addEventListener('input', () => {
+                activityDetailsCount.textContent = activityDetailsInput.value.length;
+            });
+        }
+
+        // File input name display
+        const activityProofInput = document.getElementById('activityProof');
+        const fileNameDisplay = document.getElementById('fileName');
+        if(activityProofInput) {
+            activityProofInput.addEventListener('change', () => {
+                fileNameDisplay.textContent = activityProofInput.files.length > 0 ? activityProofInput.files[0].name : 'No file chosen';
+            });
+        }
+
+
+        function showView(viewName) {
+            currentView = viewName;
+            for (const key in views) {
+                if (views[key]) views[key].classList.add('hidden');
+            }
+            if (views[viewName]) views[viewName].classList.remove('hidden');
+
+            if (viewName === 'formView') {
+                currentFormStep = 0; 
+                updateFormStepVisibility();
+            } else if (viewName === 'quickEntryView') {
+                // Initialize with one row if container is empty
+                if (quickEntryRowsContainer.children.length === 0) {
+                    addQuickEntryRow();
+                }
+            }
+        }
+
+        function updateFormStepVisibility() {
+            if (currentFormStep === 0) {
+                views.formStep0.classList.remove('hidden');
+                views.mainFormArea.classList.add('hidden');
+                backButton.classList.add('hidden'); 
+                nextButton.classList.remove('hidden');
+                saveButton.classList.add('hidden');
+            } else {
+                views.formStep0.classList.add('hidden');
+                views.mainFormArea.classList.remove('hidden');
+
+                formSteps.forEach((step, index) => {
+                    if (index === 0) return; 
+                    if (step) step.classList.add('hidden');
+                });
+                if (formSteps[currentFormStep]) formSteps[currentFormStep].classList.remove('hidden');
+
+                updateProgressIndicator();
+
+                backButton.classList.toggle('hidden', currentFormStep === 1);
+                nextButton.classList.toggle('hidden', currentFormStep === totalFormSteps);
+                saveButton.classList.toggle('hidden', currentFormStep !== totalFormSteps);
+            }
+        }
+        
+        function updateProgressIndicator() {
+            progressItems.forEach((item, index) => {
+                if (index === 0) return; 
+                if (item) {
+                    item.classList.remove('active', 'completed');
+                    const circle = item.querySelector('.progress-circle');
+                    if (index < currentFormStep) {
+                        item.classList.add('completed');
+                        circle.innerHTML = '&#10003;'; // Checkmark
+                    } else if (index === currentFormStep) {
+                        item.classList.add('active');
+                        circle.innerHTML = index;
+                    } else {
+                         circle.innerHTML = index;
+                    }
+                }
+            });
+        }
+
+        function collectFormData() {
+            activityData.experienceType = document.getElementById('experienceType').value;
+            activityData.activityType = document.getElementById('activityType').value;
+            if (currentFormStep > 0) { 
+                activityData.activityName = document.getElementById('activityName').value;
+                activityData.activityDetails = document.getElementById('activityDetails').value;
+                activityData.activityProof = document.getElementById('activityProof').files[0] || null;
+                activityData.startDate = document.getElementById('startDate').value;
+                activityData.endDate = document.getElementById('endDate').value;
+                activityData.scope = document.getElementById('scope').value;
+                activityData.engagement = document.getElementById('engagement').value;
+                const roleInput = document.getElementById('roleInput');
+                activityData.role = roleInput.classList.contains('hidden') ? "Standard Participant" : roleInput.value;
+                activityData.grade = document.getElementById('grade').value;
+            }
+        }
+        
+        function nextFormStep() {
+            collectFormData(); 
+            if (currentFormStep < totalFormSteps) {
+                currentFormStep++;
+                updateFormStepVisibility();
+                if (currentFormStep === totalFormSteps) { 
+                    renderReview();
+                }
+            } else if (currentFormStep === 0 && views.formStep0.checkValidity && !views.formStep0.checkValidity()) {
+                currentFormStep = 1;
+                updateFormStepVisibility();
+            } else if (currentFormStep === 0) { 
+                 currentFormStep = 1;
+                 updateFormStepVisibility();
+            }
+        }
+
+        function prevFormStep() {
+            if (currentFormStep > 1) {
+                currentFormStep--;
+                updateFormStepVisibility();
+            } else if (currentFormStep === 1) { 
+                currentFormStep = 0;
+                updateFormStepVisibility();
+            }
+        }
+        
+        function goToFormStep(stepNumber) {
+            if (stepNumber > 0 && stepNumber <= totalFormSteps) {
+                if (stepNumber <= getHighestCompletedStep() + 1 || stepNumber === 1) {
+                     collectFormData(); 
+                     currentFormStep = stepNumber;
+                     updateFormStepVisibility();
+                     if (currentFormStep === totalFormSteps) {
+                         renderReview();
+                     }
+                } else {
+                    alert("Please complete the previous steps first.");
+                }
+            }
+        }
+
+        function getHighestCompletedStep() {
+            let highest = 0;
+            if (activityData.experienceType && activityData.activityType) highest = 0; 
+            if (activityData.activityName) highest = 1;
+            if (activityData.startDate && activityData.endDate) highest = 2;
+            if (activityData.scope && activityData.scope !== "Choose Scope") highest = 3;
+            if (activityData.engagement && activityData.engagement !== "Choose Engagement") highest = 4;
+            if (activityData.role) highest = 5; 
+            if (activityData.grade) highest = 6;
+            return highest;
+        }
+
+
+        function renderReview() {
+            collectFormData(); 
+            const reviewContent = document.getElementById('reviewContent');
+            reviewContent.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+                    <p><strong>Experience Type:</strong></p><p>${activityData.experienceType || 'N/A'}</p>
+                    <p><strong>Activity Type:</strong></p><p>${activityData.activityType || 'N/A'}</p>
+                    <p><strong>Activity Name:</strong></p><p>${activityData.activityName || 'N/A'}</p>
+                    <p><strong>Start Date:</strong></p><p>${activityData.startDate || 'N/A'}</p>
+                    <p><strong>End Date:</strong></p><p>${activityData.endDate || 'N/A'}</p>
+                    <p><strong>Scope:</strong></p><p>${activityData.scope || 'N/A'}</p>
+                    <p><strong>Engagement:</strong></p><p>${activityData.engagement || 'N/A'}</p>
+                    <p><strong>Role:</strong></p><p>${activityData.role || 'N/A'}</p>
+                    <p><strong>Grade:</strong></p><p>${activityData.grade || 'N/A'}</p>
+                    <p class="md:col-span-2"><strong>Details:</strong></p><p class="md:col-span-2">${activityData.activityDetails || 'No details provided'}</p>
+                    <p><strong>Proof:</strong></p><p>${activityData.activityProof ? activityData.activityProof.name : 'No proof uploaded'}</p>
+                </div>
+            `;
+        }
+
+        function saveActivity() {
+            collectFormData();
+            console.log("Activity Data to Save:", activityData);
+            alert("Activity Saved (check console for data)!\nExperience Type: " + activityData.experienceType + "\nActivity Name: " + activityData.activityName);
+            showView('initialChoiceView'); 
+        }
+
+        // Chatbot placeholder functionality
+        const chatMessagesDiv = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+
+        function sendChatMessage() {
+            const messageText = chatInput.value.trim();
+            if (messageText === '') return;
+
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.classList.add('chat-message', 'user-message');
+            userMessageDiv.textContent = messageText;
+            chatMessagesDiv.appendChild(userMessageDiv);
+
+            chatInput.value = '';
+            chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+
+            setTimeout(() => {
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.classList.add('chat-message', 'bot-message');
+                let botResponse = "Thanks for your message! I'm still learning. ";
+                if (messageText.toLowerCase().includes("name")) {
+                    botResponse += "You can tell me the activity name.";
+                } else if (messageText.toLowerCase().includes("date")) {
+                    botResponse += "When did this activity take place?";
+                } else {
+                    botResponse += "How else can I help you describe your activity?";
+                }
+                botMessageDiv.textContent = botResponse;
+                chatMessagesDiv.appendChild(botMessageDiv);
+                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+            }, 1000);
+        }
+        if(chatInput) {
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendChatMessage();
+                }
+            });
+        }
+
+        // Quick Entry List Functionality
+        function addQuickEntryRow() {
+            quickEntryRowCounter++;
+            const rowId = `quickRow-${quickEntryRowCounter}`;
+            const newRow = document.createElement('div');
+            newRow.classList.add('quick-entry-row', 'bg-gray-50', 'rounded-md');
+            newRow.id = rowId;
+            newRow.innerHTML = `
+                <div>
+                    <label for="qe_activityName_${quickEntryRowCounter}" class="block text-xs font-medium text-gray-600 mb-0.5">Activity Name</label>
+                    <input type="text" id="qe_activityName_${quickEntryRowCounter}" name="qe_activityName" class="form-input mt-0.5 block w-full py-1.5 px-2 rounded-md shadow-sm sm:text-sm text-xs" placeholder="e.g., Debate Club">
+                </div>
+                <div>
+                    <label for="qe_experienceType_${quickEntryRowCounter}" class="block text-xs font-medium text-gray-600 mb-0.5">Experience Type</label>
+                    <select id="qe_experienceType_${quickEntryRowCounter}" name="qe_experienceType" class="form-select mt-0.5 block w-full py-1.5 px-2 rounded-md shadow-sm sm:text-sm text-xs">
+                        <option>Event/Activity Participation</option>
+                        <option>Internship</option>
+                        <option>Project</option>
+                        <option>Club Membership</option>
+                        <option>Volunteering</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="qe_activityType_${quickEntryRowCounter}" class="block text-xs font-medium text-gray-600 mb-0.5">Activity Type</label>
+                    <select id="qe_activityType_${quickEntryRowCounter}" name="qe_activityType" class="form-select mt-0.5 block w-full py-1.5 px-2 rounded-md shadow-sm sm:text-sm text-xs">
+                        <option>Fundraising for Medical Research</option>
+                        <option>Debate Competition</option>
+                        <option>Science Fair</option>
+                        <option>Sports Tournament</option>
+                        <option>Community Service</option>
+                        <option>Workshop</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="qe_startDate_${quickEntryRowCounter}" class="block text-xs font-medium text-gray-600 mb-0.5">Start Date</label>
+                    <input type="date" id="qe_startDate_${quickEntryRowCounter}" name="qe_startDate" class="form-input mt-0.5 block w-full py-1.5 px-2 rounded-md shadow-sm sm:text-sm text-xs">
+                </div>
+                <div>
+                    <label for="qe_endDate_${quickEntryRowCounter}" class="block text-xs font-medium text-gray-600 mb-0.5">End Date</label>
+                    <input type="date" id="qe_endDate_${quickEntryRowCounter}" name="qe_endDate" class="form-input mt-0.5 block w-full py-1.5 px-2 rounded-md shadow-sm sm:text-sm text-xs">
+                </div>
+                <button onclick="removeQuickEntryRow('${rowId}')" class="danger-btn p-2 rounded-md text-xs self-end h-9 w-9 flex items-center justify-center" title="Remove Activity">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
+                    </svg>
+                </button>
+            `;
+            quickEntryRowsContainer.appendChild(newRow);
+        }
+
+        function removeQuickEntryRow(rowId) {
+            const rowToRemove = document.getElementById(rowId);
+            if (rowToRemove) {
+                rowToRemove.remove();
+            }
+        }
+
+        function saveAllQuickEntries() {
+            const allEntries = [];
+            const rows = quickEntryRowsContainer.querySelectorAll('.quick-entry-row');
+            rows.forEach((row, index) => {
+                const entry = {
+                    activityName: row.querySelector('input[name="qe_activityName"]').value,
+                    experienceType: row.querySelector('select[name="qe_experienceType"]').value,
+                    activityType: row.querySelector('select[name="qe_activityType"]').value,
+                    startDate: row.querySelector('input[name="qe_startDate"]').value,
+                    endDate: row.querySelector('input[name="qe_endDate"]').value,
+                };
+                // Basic validation: ensure activity name is present
+                if (entry.activityName.trim() !== "") {
+                    allEntries.push(entry);
+                }
+            });
+
+            if (allEntries.length > 0) {
+                console.log("Quick Entries to Save:", allEntries);
+                alert(`${allEntries.length} activit(y/ies) saved from Quick Entry! (Check console for data)`);
+                // Clear rows after saving
+                quickEntryRowsContainer.innerHTML = '';
+                addQuickEntryRow(); // Add one fresh row
+                showView('initialChoiceView');
+            } else {
+                alert("No activities entered or no activity names provided. Please add some activities before saving.");
+            }
+        }
+
+        // Initialize the view
+        showView('initialChoiceView');
+    </script>
+</body>
+</html>
