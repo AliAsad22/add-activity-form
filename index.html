@@ -737,7 +737,7 @@
 
         // --- CHATBOT LOGIC (UPDATED) ---
         const chatbotStateOrder = [
-            'ASKING_ACTIVITY_TYPE', 'ASKING_SCOPE', 'ASKING_ENGAGEMENT',
+            'ASKING_ACTIVITY_TYPE', 'ASKING_ENGAGEMENT',
             'ASKING_START_DATE', 'ASKING_END_DATE', 'CONFIRMATION_PENDING'
         ];
 
@@ -804,19 +804,16 @@
         }
 
         function constructPromptForState(userMessage) {
-            // Simplified prompt for the streamlined flow
-            let guidance = `You are a friendly student assistant helping quickly log an extracurricular activity. You only need to collect these required fields in this order: Activity Type, Scope, Engagement, Start Date, End Date. Current data collected: ${JSON.stringify(currentActivityDataForChatbot, null, 2)}.`;
+            let guidance = `You are a friendly student assistant helping quickly log an extracurricular activity. You only need to collect these required fields in this order: Activity Type, Engagement, Start Date, End Date. Current data collected: ${JSON.stringify(currentActivityDataForChatbot, null, 2)}.`;
             let nextState = getNextChatbotState(chatbotState);
 
             switch (chatbotState) {
                 case 'ASKING_ACTIVITY_TYPE':
-                    guidance += ` The user's input for the activity is "${userMessage}". Your goal is to match this to one of these official Activity Types: [${masterActivityTypes.join(", ")}]. If there's no direct match, infer the closest one and ask for confirmation. For example, if they say 'football', ask 'Got it. Do you mean Soccer or American Football?'. Do not proceed until the Activity Type is confirmed from the list. Once confirmed, ask about the scope of the activity.`;
-                    break;
-                case 'ASKING_SCOPE':
-                    guidance += ` The Activity Type is confirmed as "${currentActivityDataForChatbot.activityType}". The user said "${userMessage}" for the scope. Please confirm this value and ask for the Engagement level. The options are: [${scopeOptions.join(", ")}]`;
+                    guidance += ` The user's input for the activity is "${userMessage}". Your goal is to match this to one of these official Activity Types: [${masterActivityTypes.join(", ")}]. If there's no direct match, infer the closest one and ask for confirmation. For example, if they say 'football', ask 'Got it. Do you mean Soccer or American Football?'. Do not proceed until the Activity Type is confirmed from the list. Once confirmed, ask about the Engagement level.`;
+                    nextState = 'ASKING_ENGAGEMENT';
                     break;
                 case 'ASKING_ENGAGEMENT':
-                    guidance += ` The scope is confirmed as "${currentActivityDataForChatbot.scope}". The user said "${userMessage}" for the engagement level. Please confirm this value and ask for the Start Date. The options are: [${engagementOptions.join(", ")}]`;
+                    guidance += ` The Activity Type is confirmed as "${currentActivityDataForChatbot.activityType}". The user said "${userMessage}" for the engagement level. Please confirm this value and ask for the Start Date. The options are: [${engagementOptions.join(", ")}]`;
                     break;
                 case 'ASKING_START_DATE':
                     guidance += ` The engagement is confirmed as "${currentActivityDataForChatbot.engagement}". The user said "${userMessage}" for the start date. Please confirm this and ask for the End Date.`;
@@ -849,21 +846,25 @@
 
             if (result.candidates && result.candidates[0].content?.parts[0]) {
                 let rawText = result.candidates[0].content.parts[0].text;
-                let conversationalText = rawText;
-                let extractedValue = null, nextStateInstruction = null;
+                
+                // Robust parsing to separate conversational text from instructions
+                const lines = rawText.split('\n');
+                let conversationalLines = [];
+                let extractedValue = null;
+                let nextStateInstruction = null;
 
-                const extractedValueMatch = rawText.match(/EXTRACTED_VALUE_FOR_PREVIOUS_STATE:(.*)/i);
-                if (extractedValueMatch && extractedValueMatch[1]) {
-                    extractedValue = extractedValueMatch[1].trim();
-                    conversationalText = conversationalText.replace(extractedValueMatch[0], '').trim();
-                }
-                
-                const setStateMatch = rawText.match(/SET_STATE:([A-Z_]+)/i);
-                if (setStateMatch && setStateMatch[1]) {
-                    nextStateInstruction = setStateMatch[1].trim();
-                    conversationalText = conversationalText.replace(setStateMatch[0], '').trim();
-                }
-                
+                lines.forEach(line => {
+                    if (line.startsWith('EXTRACTED_VALUE_FOR_PREVIOUS_STATE:')) {
+                        extractedValue = line.substring('EXTRACTED_VALUE_FOR_PREVIOUS_STATE:'.length).trim();
+                    } else if (line.startsWith('SET_STATE:')) {
+                        nextStateInstruction = line.substring('SET_STATE:'.length).trim();
+                    } else {
+                        conversationalLines.push(line);
+                    }
+                });
+
+                const conversationalText = conversationalLines.join('\n').trim();
+
                 updateChatbotData(extractedValue); 
                 if (nextStateInstruction) chatbotState = nextStateInstruction;
 
@@ -872,7 +873,7 @@
                     allActivities.unshift(newActivity);
                     setTimeout(() => showView('timelineView', document.querySelector('a[onclick*="timelineView"]')), 2000);
                 }
-                return conversationalText.trim();
+                return conversationalText;
             } else {
                 return "I'm having trouble thinking. Could you try that again?";
             }
@@ -881,7 +882,7 @@
         function updateChatbotData(valueFromLLM) {
             if (!valueFromLLM || valueFromLLM.toUpperCase() === 'NONE') return;
             const fieldMap = {
-                 'ASKING_ACTIVITY_TYPE': 'activityType', 'ASKING_SCOPE': 'scope', 
+                 'ASKING_ACTIVITY_TYPE': 'activityType', 
                  'ASKING_ENGAGEMENT': 'engagement', 'ASKING_START_DATE': 'startDate', 
                  'ASKING_END_DATE': 'endDate'
             };
@@ -947,7 +948,6 @@
                     <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500 mt-2">
                         ${missingInfoButton(activity.experienceType, 'Experience Type')}
                         <span><strong>Duration:</strong> ${durationDays} Day(s)</span>
-                        <span><strong>Scope:</strong> ${activity.scope || 'N/A'}</span>
                         <span><strong>Engagement:</strong> ${activity.engagement || 'N/A'}</span>
                     </div>
                     <div class="mt-4 flex flex-col sm:flex-row gap-4 items-start">
