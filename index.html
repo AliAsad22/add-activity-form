@@ -159,9 +159,9 @@
             padding: 0.75rem;
             border-bottom: 1px solid #e5e7eb; 
         }
-         @media (min-width: 768px) { /* md breakpoint */
+         @media (min-width: 1024px) { /* lg breakpoint */
             .quick-entry-row {
-                grid-template-columns: 2fr 1.5fr 1.5fr 1fr 1fr auto;
+                grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr auto;
             }
         }
         /* Timeline styles */
@@ -184,6 +184,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+        .missing-info-btn {
+            background-color: #fef3c7; /* Light yellow */
+            color: #92400e; /* Dark yellow/brown */
+            border: 1px solid #fde68a;
+        }
+        .missing-info-btn:hover {
+            background-color: #fde68a;
         }
 
     </style>
@@ -393,7 +401,7 @@
                     <h2 class="text-xl md:text-2xl font-bold text-gray-800">Quick Entry for Multiple Activities</h2>
                     <button onclick="showView('formView')" class="secondary-btn py-2 px-4 rounded-md text-sm font-medium">Back to Form</button>
                 </div>
-                <p class="text-gray-600 mb-6 text-sm">Quickly add the basic details for multiple activities below. You can add more details later if needed.</p>
+                <p class="text-gray-600 mb-6 text-sm">Quickly add the required details for multiple activities below. You can add the optional information from the timeline later.</p>
                 <div id="quickEntryRowsContainer" class="mb-6 space-y-4"></div>
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <button onclick="addQuickEntryRow()" class="w-full sm:w-auto primary-btn py-2 px-4 rounded-md text-sm font-medium flex items-center justify-center">
@@ -430,11 +438,11 @@
 
         // --- CONSTANTS ---
         const totalFormSteps = 7; 
-        const OPENAI_API_KEY = "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"; // IMPORTANT: Replace with your actual key
-        const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+        const GEMINI_API_KEY = "";
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
         
         const experienceTypes = ["Certification/Recognition", "Internships", "Event Organization", "Event/Activity Participation", "Event Competition", "Club Membership"];
-        const masterActivityTypes = ["Soccer", "American Football", "Model United Nations (MUN)", "Debate Club", "Science Fair", "Volunteering at Animal Shelter", "Community Cleanup", "Hackathon", "Chess Club", "Basketball", "Art Exhibition"]; // Placeholder Master List
+        const masterActivityTypes = ["Soccer", "American Football", "Model United Nations (MUN)", "Debate Club", "Science Fair", "Volunteering at Animal Shelter", "Community Cleanup", "Hackathon", "Chess Club", "Basketball", "Art Exhibition"];
         const scopeOptions = ["Section", "Class", "School", "Local", "Region", "State/Province", "National", "International", "Global"];
         const engagementOptions = ["Low - (1-2 Hours) / week", "Moderate - (3-5 Hours) / week", "Heavy - (4-6 Hours) / week", "Extra - (7+ Hours) / week"];
         
@@ -456,7 +464,7 @@
         // Chatbot specific state
         let chatbotState = 'INIT';
         let currentActivityDataForChatbot = {};
-        let chatHistory = [];
+        let chatHistory = []; 
 
         // --- DOM ELEMENTS CACHE ---
         const views = {
@@ -644,7 +652,7 @@
             showView('timelineView', document.querySelector('a[onclick*="timelineView"]'));
         }
 
-        // --- QUICK ENTRY LOGIC ---
+        // --- QUICK ENTRY LOGIC (UPDATED) ---
          function addQuickEntryRow() {
             quickEntryRowCounter++;
             const rowId = `quickRow-${quickEntryRowCounter}`;
@@ -653,18 +661,22 @@
             newRow.id = rowId;
             newRow.innerHTML = `
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-0.5">Activity Name</label>
-                    <input type="text" name="qe_activityName" class="form-input mt-0.5 block w-full py-1.5 px-2 rounded-md shadow-sm sm:text-sm text-xs" placeholder="e.g., Debate Club">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-0.5">Experience Type</label>
-                    <select name="qe_experienceType" class="form-select mt-0.5 block w-full py-1.5 px-2 rounded-md shadow-sm sm:text-sm text-xs">
-                        ${experienceTypes.map(o => `<option>${o}</option>`).join('')}
+                    <label class="block text-xs font-medium text-gray-600 mb-0.5">Activity Type</label>
+                    <select name="qe_activityType" class="form-select mt-0.5 block w-full py-1.5 px-2 rounded-md shadow-sm sm:text-sm text-xs">
+                        ${masterActivityTypes.map(o => `<option>${o}</option>`).join('')}
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-0.5">Activity Type / Field</label>
-                    <input type="text" name="qe_activityType" class="form-input mt-0.5 block w-full py-1.5 px-2 rounded-md shadow-sm sm:text-sm text-xs" placeholder="e.g., Arts">
+                    <label class="block text-xs font-medium text-gray-600 mb-0.5">Scope</label>
+                    <select name="qe_scope" class="form-select mt-0.5 block w-full py-1.5 px-2 rounded-md shadow-sm sm:text-sm text-xs">
+                        ${scopeOptions.map(o => `<option>${o}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-0.5">Engagement</label>
+                    <select name="qe_engagement" class="form-select mt-0.5 block w-full py-1.5 px-2 rounded-md shadow-sm sm:text-sm text-xs">
+                        ${engagementOptions.map(o => `<option>${o}</option>`).join('')}
+                    </select>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-0.5">Start Date</label>
@@ -694,15 +706,21 @@
             let entriesAdded = 0;
             rows.forEach((row) => {
                 const entry = {
-                    activityName: row.querySelector('input[name="qe_activityName"]').value,
-                    experienceType: row.querySelector('select[name="qe_experienceType"]').value,
-                    activityType: row.querySelector('input[name="qe_activityType"]').value,
+                    // Required fields from the form
+                    activityType: row.querySelector('select[name="qe_activityType"]').value,
+                    scope: row.querySelector('select[name="qe_scope"]').value,
+                    engagement: row.querySelector('select[name="qe_engagement"]').value,
                     startDate: row.querySelector('input[name="qe_startDate"]').value,
                     endDate: row.querySelector('input[name="qe_endDate"]').value,
-                    scope: 'N/A', engagement: 'N/A', role: 'Participant',
-                    grade: 'N/A', activityDetails: '', status: 'Approved'
+                    // Optional fields set to null/placeholder
+                    experienceType: null,
+                    activityName: null, 
+                    role: null, 
+                    grade: null, 
+                    activityDetails: null, 
+                    status: 'Pending Completion'
                 };
-                if (entry.activityName.trim() !== "") {
+                if (entry.activityType && entry.startDate && entry.endDate) { // Basic validation
                     allActivities.unshift(entry);
                     entriesAdded++;
                 }
@@ -713,23 +731,30 @@
                 alert(`${entriesAdded} activit(y/ies) saved! You will now be taken to the timeline.`);
                 showView('timelineView', document.querySelector('a[onclick*="timelineView"]'));
             } else {
-                alert("No activities entered or no activity names provided.");
+                alert("No valid activities to save. Please ensure start and end dates are filled.");
             }
         }
 
-        // --- CHATBOT LOGIC ---
+        // --- CHATBOT LOGIC (UPDATED) ---
+        const chatbotStateOrder = [
+            'ASKING_ACTIVITY_TYPE', 'ASKING_SCOPE', 'ASKING_ENGAGEMENT',
+            'ASKING_START_DATE', 'ASKING_END_DATE', 'CONFIRMATION_PENDING'
+        ];
+
         function startChatbot() {
             showView('chatbotView');
             chatHistory = []; 
             currentActivityDataForChatbot = {};
             chatbotState = 'INIT';
             if(chatMessagesDiv) chatMessagesDiv.innerHTML = ''; 
-            if(chatInputEl) chatInputEl.value = '';
-            if(chatInputEl) chatInputEl.disabled = true;
+            if(chatInputEl) {
+                chatInputEl.value = '';
+                chatInputEl.disabled = true;
+            }
             if(chatSendButton) chatSendButton.disabled = true;
             
-            addMessageToChatInterface(`Hi! I'm your AI assistant. Let's add your activity.\n\nFirst, what type of experience was this? The options are: ${experienceTypes.join(", ")}.`, 'bot');
-            chatbotState = 'ASKING_EXPERIENCE_TYPE';
+            addMessageToChatInterface(`Hi! I'm your AI assistant. Let's quickly add an activity.\n\nFirst, what is the activity type? (e.g., Soccer, MUN, Science Fair)`, 'bot');
+            chatbotState = 'ASKING_ACTIVITY_TYPE';
             if(chatInputEl) chatInputEl.disabled = false;
             if(chatSendButton) chatSendButton.disabled = false;
         }
@@ -744,28 +769,22 @@
         }
 
         async function sendChatMessageToAI() {
-            if (OPENAI_API_KEY === "YOUR_OPENAI_API_KEY_HERE") {
-                addMessageToChatInterface("The OpenAI API key is not set up. Please add your key to the script to enable the chatbot.", "bot");
-                return;
-            }
             const userMessageText = chatInputEl.value.trim();
             if (userMessageText === '') return;
-            
             addMessageToChatInterface(userMessageText, 'user');
-            chatHistory.push({ role: "user", content: userMessageText });
-            
+            chatHistory.push({ role: "user", parts: [{ text: userMessageText }] });
             chatInputEl.value = '';
             chatInputEl.disabled = true;
             chatSendButton.disabled = true;
             if(chatLoadingIndicator) chatLoadingIndicator.classList.remove('hidden');
 
             try {
-                const botResponseText = await getAIReply();
+                const botResponseText = await getAIReply(userMessageText);
                 addMessageToChatInterface(botResponseText, 'bot');
-                chatHistory.push({ role: "assistant", content: botResponseText });
+                chatHistory.push({ role: "model", parts: [{ text: botResponseText }] });
             } catch (error) {
                 console.error("Error getting AI reply:", error);
-                addMessageToChatInterface("Sorry, I encountered an error. Please check the console for details.", 'bot');
+                addMessageToChatInterface("Sorry, I encountered an error. Please try again.", 'bot');
             } finally {
                 if(chatLoadingIndicator) chatLoadingIndicator.classList.add('hidden');
                 if (chatbotState !== 'FINALIZED' && chatbotState !== 'CONFIRMATION_PENDING') {
@@ -784,59 +803,56 @@
             });
         }
 
-        function getSystemPrompt() {
-            return `You are a friendly and efficient student assistant. Your goal is to help a student log an extracurricular activity by asking them questions one at a time.
-            The final data object you need to fill has the following fields: ${Object.keys(activityData).join(', ')}.
-            
-            Here are the fixed lists you must use for certain fields:
-            - Experience Types: [${experienceTypes.join(", ")}]
-            - Master Activity Types: [${masterActivityTypes.join(", ")}]
+        function constructPromptForState(userMessage) {
+            // Simplified prompt for the streamlined flow
+            let guidance = `You are a friendly student assistant helping quickly log an extracurricular activity. You only need to collect these required fields in this order: Activity Type, Scope, Engagement, Start Date, End Date. Current data collected: ${JSON.stringify(currentActivityDataForChatbot, null, 2)}.`;
+            let nextState = getNextChatbotState(chatbotState);
 
-            Your conversation flow is managed by a state machine. After your conversational response, you MUST provide instructions on a new line in the format "EXTRACTED_VALUE:[value]" and on another new line "SET_STATE:[NEXT_STATE]".
-            
-            RULES:
-            1.  Ask one question at a time.
-            2.  For 'experienceType' and 'activityType', if the user's answer is not in the fixed list, you must infer the closest match and ask for confirmation. Do not proceed until the value is confirmed from the list. For example, if they say "I played football" for activity type, you MUST ask "Got it. Do you mean Soccer or American Football?" to get a precise value from your list.
-            3.  After you get the final piece of information, summarize everything you've collected and ask for final confirmation from the user.
-            4.  If the user confirms the summary, respond with "Great! I've saved your activity: [Activity Name]." and set the state to FINALIZED.
-            5.  If the user wants to make a correction, ask them what they'd like to change and set the state to AWAITING_CORRECTION.
-            `;
+            switch (chatbotState) {
+                case 'ASKING_ACTIVITY_TYPE':
+                    guidance += ` The user's input for the activity is "${userMessage}". Your goal is to match this to one of these official Activity Types: [${masterActivityTypes.join(", ")}]. If there's no direct match, infer the closest one and ask for confirmation. For example, if they say 'football', ask 'Got it. Do you mean Soccer or American Football?'. Do not proceed until the Activity Type is confirmed from the list. Once confirmed, ask about the scope of the activity.`;
+                    break;
+                case 'ASKING_SCOPE':
+                    guidance += ` The Activity Type is confirmed as "${currentActivityDataForChatbot.activityType}". The user said "${userMessage}" for the scope. Please confirm this value and ask for the Engagement level. The options are: [${scopeOptions.join(", ")}]`;
+                    break;
+                case 'ASKING_ENGAGEMENT':
+                    guidance += ` The scope is confirmed as "${currentActivityDataForChatbot.scope}". The user said "${userMessage}" for the engagement level. Please confirm this value and ask for the Start Date. The options are: [${engagementOptions.join(", ")}]`;
+                    break;
+                case 'ASKING_START_DATE':
+                    guidance += ` The engagement is confirmed as "${currentActivityDataForChatbot.engagement}". The user said "${userMessage}" for the start date. Please confirm this and ask for the End Date.`;
+                    break;
+                case 'ASKING_END_DATE':
+                     guidance += ` The start date is confirmed as "${currentActivityDataForChatbot.startDate}". The user said "${userMessage}" for the end date. Please confirm this, then summarize all the information collected and ask for final confirmation.`;
+                     nextState = 'CONFIRMATION_PENDING';
+                     break;
+                case 'CONFIRMATION_PENDING':
+                     guidance = `You have collected: ${JSON.stringify(currentActivityDataForChatbot)}. The user's response to your summary was: "${userMessage}". If they confirm ('yes', 'correct'), respond with "Great! I've saved a draft of your activity. You can add more details from the timeline." and set state to FINALIZED. If they want to change something, ask what they'd like to change and set state to AWAITING_CORRECTION.`;
+                    break;
+                case 'AWAITING_CORRECTION':
+                    guidance = `The user wants to correct information. Current data: ${JSON.stringify(currentActivityDataForChatbot)}. User's correction: "${userMessage}". Update the relevant field, then re-summarize and ask for confirmation again. Set state to CONFIRMATION_PENDING.`;
+                    break;
+            }
+
+            return `${guidance}\nYour response must be conversational. After your conversational text, you MUST include the following on separate lines:\nEXTRACTED_VALUE_FOR_PREVIOUS_STATE:[The value you extracted from the user's last message. If none, write NONE.]\nSET_STATE:[${nextState}]`;
         }
+        
+        async function getAIReply(userMessage) {
+            const prompt = constructPromptForState(userMessage);
+            const payload = { contents: [...chatHistory, { role: "user", parts: [{ text: prompt }] }] };
 
-        async function getAIReply() {
-            const messages = [
-                { role: "system", content: getSystemPrompt() },
-                ...chatHistory
-            ];
-
-            const payload = {
-                model: "gpt-3.5-turbo",
-                messages: messages
-            };
-
-            const response = await fetch(OPENAI_API_URL, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${OPENAI_API_KEY}`
-                },
-                body: JSON.stringify(payload)
+            const response = await fetch(GEMINI_API_URL, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`OpenAI API request failed: ${errorData.error.message}`);
-            }
-            
+            if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
             const result = await response.json();
 
-            if (result.choices && result.choices[0] && result.choices[0].message) {
-                let rawText = result.choices[0].message.content;
+            if (result.candidates && result.candidates[0].content?.parts[0]) {
+                let rawText = result.candidates[0].content.parts[0].text;
                 let conversationalText = rawText;
-                let extractedValue = null;
-                let nextStateInstruction = null;
+                let extractedValue = null, nextStateInstruction = null;
 
-                const extractedValueMatch = rawText.match(/EXTRACTED_VALUE:(.*)/i);
+                const extractedValueMatch = rawText.match(/EXTRACTED_VALUE_FOR_PREVIOUS_STATE:(.*)/i);
                 if (extractedValueMatch && extractedValueMatch[1]) {
                     extractedValue = extractedValueMatch[1].trim();
                     conversationalText = conversationalText.replace(extractedValueMatch[0], '').trim();
@@ -849,40 +865,38 @@
                 }
                 
                 updateChatbotData(extractedValue); 
-                
-                if (nextStateInstruction) {
-                    chatbotState = nextStateInstruction;
-                }
+                if (nextStateInstruction) chatbotState = nextStateInstruction;
 
                 if (chatbotState === 'FINALIZED') {
-                    const newActivity = { ...currentActivityDataForChatbot, status: 'Approved' };
+                    const newActivity = { ...currentActivityDataForChatbot, status: 'Pending Completion' };
                     allActivities.unshift(newActivity);
-                    setTimeout(() => {
-                        showView('timelineView', document.querySelector('a[onclick*="timelineView"]'));
-                    }, 2000);
+                    setTimeout(() => showView('timelineView', document.querySelector('a[onclick*="timelineView"]')), 2000);
                 }
                 return conversationalText.trim();
             } else {
-                return "I seem to be having trouble thinking. Could you try that again?";
+                return "I'm having trouble thinking. Could you try that again?";
             }
         }
         
         function updateChatbotData(valueFromLLM) {
             if (!valueFromLLM || valueFromLLM.toUpperCase() === 'NONE') return;
             const fieldMap = {
-                 'ASKING_EXPERIENCE_TYPE': 'experienceType', 'ASKING_ACTIVITY_TYPE': 'activityType',
-                 'ASKING_ACTIVITY_NAME': 'activityName', 'ASKING_START_DATE': 'startDate', 
-                 'ASKING_END_DATE': 'endDate', 'ASKING_SCOPE': 'scope', 
-                 'ASKING_ENGAGEMENT': 'engagement', 'ASKING_ROLE': 'role', 
-                 'ASKING_GRADE': 'grade', 'ASKING_DETAILS_OPTIONAL': 'activityDetails',
-                 'ASKING_PROOF_OPTIONAL': 'proofProvided'
+                 'ASKING_ACTIVITY_TYPE': 'activityType', 'ASKING_SCOPE': 'scope', 
+                 'ASKING_ENGAGEMENT': 'engagement', 'ASKING_START_DATE': 'startDate', 
+                 'ASKING_END_DATE': 'endDate'
             };
-            if (fieldMap[chatbotState]) {
-                currentActivityDataForChatbot[fieldMap[chatbotState]] = valueFromLLM;
-            }
+            if (fieldMap[chatbotState]) currentActivityDataForChatbot[fieldMap[chatbotState]] = valueFromLLM;
         }
         
-        // --- TIMELINE LOGIC ---
+        function getNextChatbotState(currentState) {
+            const currentIndex = chatbotStateOrder.indexOf(currentState);
+            if (currentIndex !== -1 && currentIndex < chatbotStateOrder.length - 1) {
+                return chatbotStateOrder[currentIndex + 1];
+            }
+            return 'CONFIRMATION_PENDING';
+        }
+
+        // --- TIMELINE LOGIC (UPDATED) ---
         function renderTimeline() {
             if (!timelineContainer) return;
             if (allActivities.length === 0) {
@@ -906,6 +920,17 @@
                 return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             };
             const durationDays = getDurationInDays(activity.startDate, activity.endDate);
+
+            const statusColor = activity.status === 'Approved' ? 'green' : 'yellow';
+            const activityTitle = activity.activityName || activity.activityType || 'Untitled Activity';
+            
+            const missingInfoButton = (field, label) => {
+                if (!field) {
+                    return `<button class="text-xs missing-info-btn px-2 py-1 rounded-md" onclick="alert('This would open a modal to add the ${label}.')">+ Add ${label}</button>`;
+                }
+                return `<span><strong>${label}:</strong> ${field}</span>`;
+            };
+
             return `
             <div class="timeline-item">
                 <div class="timeline-icon bg-purple-100 text-purple-600">
@@ -913,27 +938,24 @@
                 </div>
                 <div class="bg-white p-4 rounded-lg shadow-sm">
                     <div class="flex flex-wrap justify-between items-start gap-2">
-                        <h3 class="font-bold text-lg text-gray-800">${activity.activityName || 'Unnamed Activity'}</h3>
+                        <h3 class="font-bold text-lg text-gray-800">${activityTitle}</h3>
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-full">${activity.role || 'Participant'}</span>
-                            <span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">${activity.status || 'Pending'}</span>
+                            ${missingInfoButton(activity.role, 'Role')}
+                            <span class="text-xs font-bold text-${statusColor}-700 bg-${statusColor}-100 px-2 py-1 rounded-full">${activity.status || 'Pending'}</span>
                         </div>
                     </div>
-                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 mt-2">
-                        <span><strong>Type:</strong> ${activity.experienceType || 'N/A'}</span>
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500 mt-2">
+                        ${missingInfoButton(activity.experienceType, 'Experience Type')}
                         <span><strong>Duration:</strong> ${durationDays} Day(s)</span>
-                        <span><strong>Field:</strong> ${activity.activityType || 'N/A'}</span>
                         <span><strong>Scope:</strong> ${activity.scope || 'N/A'}</span>
                         <span><strong>Engagement:</strong> ${activity.engagement || 'N/A'}</span>
                     </div>
                     <div class="mt-4 flex flex-col sm:flex-row gap-4 items-start">
                         <div class="bg-blue-100 text-blue-800 text-sm font-medium px-4 py-2 rounded-lg">
                             <p class="font-bold">★ Student experience</p>
-                            <p>Participation in ${activity.activityName || 'this activity'}</p>
+                            <p>${activity.activityName ? `Participation in ${activity.activityName}`: 'Complete the activity details'}</p>
                         </div>
-                        <div class="bg-green-100 text-green-800 text-sm font-medium px-4 py-2 rounded-lg">
-                            <p>This experience claim is approved</p>
-                        </div>
+                         ${activity.status === 'Approved' ? `<div class="bg-green-100 text-green-800 text-sm font-medium px-4 py-2 rounded-lg"><p>This experience claim is approved</p></div>` : ''}
                     </div>
                 </div>
             </div>`;
