@@ -42,6 +42,7 @@
             color: white;
         }
         .info-icon {
+            position: relative;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -54,6 +55,42 @@
             font-weight: bold;
             cursor: help;
         }
+        /* Tooltip Styles */
+        .info-icon .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background-color: #2d3748; /* Dark gray */
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 8px 12px;
+            position: absolute;
+            z-index: 10;
+            bottom: 150%;
+            left: 50%;
+            margin-left: -110px; /* Use half of the width to center the tooltip */
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.75rem; /* 12px */
+            line-height: 1.5;
+            font-weight: 400;
+            pointer-events: none;
+        }
+        .info-icon .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #2d3748 transparent transparent transparent;
+        }
+        .info-icon:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
         /* Custom file input */
         .custom-file-input::-webkit-file-upload-button {
             visibility: hidden;
@@ -234,8 +271,8 @@
         <!-- Form View Container -->
         <div id="formView" class="hidden">
             <div class="mb-6 p-4 bg-gray-100 rounded-lg shadow">
-                <h2 class="text-xl font-semibold text-gray-700 mb-3">Add Your Activity</h2>
-                <p class="text-sm text-gray-600 mb-3">You are currently using the guided form. You can also switch to other methods:</p>
+                <h2 class="text-xl font-semibold text-gray-700 mb-3">Log a New Activity</h2>
+                <p class="text-sm text-gray-600 mb-3">Let's go step-by-step! If you prefer, you can use these other ways to add your activities:</p>
                 <div class="flex flex-col sm:flex-row gap-3">
                     <button onclick="showView('quickEntryView')" class="w-full sm:w-auto tertiary-btn py-2 px-4 rounded-md text-sm font-medium">
                         Use Quick Entry (for multiple activities)
@@ -248,18 +285,22 @@
 
             <!-- Step 0: Select Experience Type & Activity -->
             <div id="formStep0" class="bg-white p-6 md:p-8 rounded-lg shadow-xl mb-6">
-                 <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-1">Step 1: Select Experience Type & Activity</h3>
-                 <p class="text-gray-600 mb-6 text-sm">Help us understand the nature of your activity.</p>
+                 <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-1">Let's Categorize Your Activity</h3>
+                 <p class="text-gray-600 mb-6 text-sm">To start, help us understand what kind of activity you're adding. This ensures it's correctly placed on your profile.</p>
                 
                 <div class="mb-4">
-                    <label for="experienceType" class="block text-sm font-medium text-gray-700 mb-1">Select experience type <span class="info-icon">i</span></label>
+                    <label for="experienceType" class="block text-sm font-medium text-gray-700 mb-1">Experience Category 
+                        <span class="info-icon">i<span class="tooltip-text">This is the main bucket your activity falls into. For example, 'Club Membership' for the debate club, or 'Event Competition' for a science fair you competed in.</span></span>
+                    </label>
                     <select id="experienceType" name="experienceType" class="form-select mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
                         <!-- Options populated by JS -->
                     </select>
                 </div>
                 <div class="mb-6">
-                    <label for="activityType" class="block text-sm font-medium text-gray-700 mb-1">Activity Type / Field <span class="info-icon">i</span></label>
-                    <input type="text" id="activityType" name="activityType" class="form-input mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm" placeholder="e.g., Performing Arts, Medical Research">
+                    <label for="activityType" class="block text-sm font-medium text-gray-700 mb-1">Subject or Field 
+                        <span class="info-icon">i<span class="tooltip-text">This describes the area of your activity. For example, 'Public Speaking' for Model UN, 'STEM' for a robotics club, or 'Community Service' for a cleanup drive.</span></span>
+                    </label>
+                    <input type="text" id="activityType" name="activityType" class="form-input mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm" placeholder="e.g., Performing Arts, Medical Research, Computer Science">
                 </div>
                 <div class="flex justify-end">
                     <button onclick="nextFormStep()" class="primary-btn py-2 px-6 rounded-md text-sm font-medium">Next Step</button>
@@ -281,21 +322,27 @@
                     <!-- Form Steps Content -->
                     <div class="w-full md:w-3/4">
                         <div id="formStep1" class="form-step">
-                            <h2 class="text-xl font-bold text-gray-800 mb-1">Your Activity Details</h2>
-                            <p class="text-gray-600 mb-6 text-sm">Now let's get into the specifics!</p>
+                            <h2 class="text-xl font-bold text-gray-800 mb-1">Activity Details</h2>
+                            <p class="text-gray-600 mb-6 text-sm">Provide the official name of your activity and any important details. This helps people understand your involvement.</p>
                             
                             <div class="mb-4">
-                                <label for="activityName" class="block text-sm font-medium text-gray-700 mb-1">Activity Name <span class="info-icon">i</span></label>
-                                <input type="text" id="activityName" name="activityName" class="form-input mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm" placeholder="Enter Activity Name" maxlength="50">
+                                <label for="activityName" class="block text-sm font-medium text-gray-700 mb-1">Official Activity Name 
+                                    <span class="info-icon">i<span class="tooltip-text">Use the full, official name of the club, event, or project. For example, 'Greenwood High School Annual Science Olympiad' instead of just 'science fair'.</span></span>
+                                </label>
+                                <input type="text" id="activityName" name="activityName" class="form-input mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm" placeholder="e.g., Varsity Soccer Team, Annual Science Fair Project">
                                 <p class="text-xs text-gray-500 mt-1 text-right"><span id="activityNameCount">0</span>/50</p>
                             </div>
                             <div class="mb-4">
-                                <label for="activityDetails" class="block text-sm font-medium text-gray-700 mb-1">Activity Details (optional) <span class="info-icon">i</span></label>
-                                <textarea id="activityDetails" name="activityDetails" rows="3" class="form-textarea mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm" placeholder="Write activity details" maxlength="200"></textarea>
+                                <label for="activityDetails" class="block text-sm font-medium text-gray-700 mb-1">Describe Your Activity (Optional) 
+                                    <span class="info-icon">i<span class="tooltip-text">Here, you can mention your specific tasks, achievements, or what you learned. Example: 'I was the lead programmer for our team's robot, which won second place.'</span></span>
+                                </label>
+                                <textarea id="activityDetails" name="activityDetails" rows="3" class="form-textarea mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm" placeholder="e.g., I was the lead programmer for our team's robot, which won second place." maxlength="200"></textarea>
                                 <p class="text-xs text-gray-500 mt-1 text-right"><span id="activityDetailsCount">0</span>/200</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Upload Proof (optional) <span class="info-icon">i</span></label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Upload Proof (optional) 
+                                    <span class="info-icon">i<span class="tooltip-text">You can upload files like certificates, photos, or official documents. This helps verify your participation.</span></span>
+                                </label>
                                 <div class="mt-1 flex items-center">
                                     <input type="file" id="activityProof" name="activityProof" class="custom-file-input text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
                                     <span id="fileName" class="ml-3 text-sm text-gray-500">No file chosen</span>
@@ -304,23 +351,29 @@
                         </div>
 
                         <div id="formStep2" class="form-step hidden">
-                            <h2 class="text-xl font-bold text-gray-800 mb-1">Time Frame</h2>
-                            <p class="text-gray-600 mb-6 text-sm">Let us know when your activity took place.</p>
+                            <h2 class="text-xl font-bold text-gray-800 mb-1">Activity Duration</h2>
+                            <p class="text-gray-600 mb-6 text-sm">Please provide the start and end dates for this activity. This helps show the length of your commitment.</p>
                             <div class="mb-4">
-                                <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Select Start Date <span class="info-icon">i</span></label>
+                                <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Start Date 
+                                    <span class="info-icon">i<span class="tooltip-text">The date when you first started this activity.</span></span>
+                                </label>
                                 <input type="date" id="startDate" name="startDate" class="form-input mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm">
                             </div>
                             <div>
-                                <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">Select End Date <span class="info-icon">i</span></label>
+                                <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">End Date 
+                                    <span class="info-icon">i<span class="tooltip-text">The date when the activity finished. If it's ongoing, you can leave this blank or select today's date.</span></span>
+                                </label>
                                 <input type="date" id="endDate" name="endDate" class="form-input mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm">
                             </div>
                         </div>
 
                         <div id="formStep3" class="form-step hidden">
-                            <h2 class="text-xl font-bold text-gray-800 mb-1">Impact</h2>
-                            <p class="text-gray-600 mb-6 text-sm">Tell us how far your activity reached!</p>
+                            <h2 class="text-xl font-bold text-gray-800 mb-1">Level of Participation</h2>
+                            <p class="text-gray-600 mb-6 text-sm">Indicate the reach of this activity. For example, was it a school-level club, a regional competition, or an international conference?</p>
                             <div class="mb-4">
-                                <label for="scope" class="block text-sm font-medium text-gray-700 mb-1">Scope <span class="info-icon">i</span></label>
+                                <label for="scope" class="block text-sm font-medium text-gray-700 mb-1">Activity Reach 
+                                    <span class="info-icon">i<span class="tooltip-text">'Class' is just your group. 'School' is for the whole school. 'Local' is your city, 'Regional' is your state/province, and 'National' or 'International' is for activities across the country or world.</span></span>
+                                </label>
                                 <select id="scope" name="scope" class="form-select mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm">
                                     <!-- Options populated by JS -->
                                 </select>
@@ -328,10 +381,12 @@
                         </div>
                         
                         <div id="formStep4" class="form-step hidden">
-                            <h2 class="text-xl font-bold text-gray-800 mb-1">Effort</h2>
-                            <p class="text-gray-600 mb-6 text-sm">How much time and energy did you dedicate?</p>
+                            <h2 class="text-xl font-bold text-gray-800 mb-1">Your Time Commitment</h2>
+                            <p class="text-gray-600 mb-6 text-sm">Select the option that best describes the average amount of time you dedicated to this activity each week.</p>
                             <div class="mb-4">
-                                <label for="engagement" class="block text-sm font-medium text-gray-700 mb-1">Engagement <span class="info-icon">i</span></label>
+                                <label for="engagement" class="block text-sm font-medium text-gray-700 mb-1">Weekly Commitment 
+                                    <span class="info-icon">i<span class="tooltip-text">Estimate the average number of hours you spent on this activity per week. This includes meetings, practice, and any work you did on your own.</span></span>
+                                </label>
                                 <select id="engagement" name="engagement" class="form-select mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm">
                                     <!-- Options populated by JS -->
                                 </select>
@@ -339,26 +394,28 @@
                         </div>
 
                         <div id="formStep5" class="form-step hidden">
-                            <h2 class="text-xl font-bold text-gray-800 mb-1">Your Role</h2>
-                            <p class="text-gray-600 mb-6 text-sm">What was your position in this activity?</p>
+                            <h2 class="text-xl font-bold text-gray-800 mb-1">Your Position or Role</h2>
+                            <p class="text-gray-600 mb-6 text-sm">Specify your title or position in this activity. If you were a general member, 'Participant' is a great choice. If this activity type doesn't have specific roles, we'll record your involvement as a participant.</p>
                             <div id="roleContent" class="p-4 bg-gray-50 rounded-md text-sm text-gray-700">
                                 No specific roles are available for this activity type. Your participation will be recorded as a standard participant.
-                                <input type="text" id="roleInput" name="roleInput" class="form-input mt-2 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm hidden" placeholder="Specify your role">
+                                <input type="text" id="roleInput" name="roleInput" class="form-input mt-2 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm hidden" placeholder="e.g., Team Captain, Treasurer, Member">
                             </div>
                         </div>
 
                         <div id="formStep6" class="form-step hidden">
-                            <h2 class="text-xl font-bold text-gray-800 mb-1">Grade Level</h2>
-                            <p class="text-gray-600 mb-6 text-sm">Which grade were you in during this activity?</p>
+                            <h2 class="text-xl font-bold text-gray-800 mb-1">Your Grade Level</h2>
+                            <p class="text-gray-600 mb-6 text-sm">Please enter the grade you were in when you participated in this activity. This helps provide academic context to your experiences.</p>
                             <div class="mb-4">
-                                <label for="grade" class="block text-sm font-medium text-gray-700 mb-1">Add Grade <span class="info-icon">i</span></label>
-                                <input type="number" id="grade" name="grade" class="form-input mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm" placeholder="e.g., 10">
+                                <label for="grade" class="block text-sm font-medium text-gray-700 mb-1">Grade 
+                                    <span class="info-icon">i<span class="tooltip-text">Enter the grade you were in when you were doing this activity. For example, if you were in the 10th grade, just enter '10'.</span></span>
+                                </label>
+                                <input type="number" id="grade" name="grade" class="form-input mt-1 block w-full py-2 px-3 rounded-md shadow-sm sm:text-sm" placeholder="e.g., 9, 10, 11">
                             </div>
                         </div>
 
                         <div id="formStep7" class="form-step hidden">
-                            <h2 class="text-xl font-bold text-gray-800 mb-1">Review Your Activity</h2>
-                            <p class="text-gray-600 mb-6 text-sm">Please review all details before submitting.</p>
+                            <h2 class="text-xl font-bold text-gray-800 mb-1">Final Review</h2>
+                            <p class="text-gray-600 mb-6 text-sm">Please take a moment to review all the details you've provided. You can go back to make changes before saving.</p>
                             <div id="reviewContent" class="space-y-3 text-sm">
                                 <!-- Review details will be populated here -->
                             </div>
@@ -447,10 +504,13 @@
         const engagementOptions = ["Low - (1-2 Hours) / week", "Moderate - (3-5 Hours) / week", "Heavy - (4-6 Hours) / week", "Extra - (7+ Hours) / week"];
         
         const formProgressSteps = [
-            { id: 1, label: 'Activity' }, { id: 2, label: 'Duration' },
-            { id: 3, label: 'Scope' }, { id: 4, label: 'Engagement' },
-            { id: 5, label: 'Role' }, { id: 6, label: 'Grade' },
-            { id: 7, label: 'Overview' }
+            { id: 1, label: 'Details' }, // Renamed for clarity
+            { id: 2, label: 'Duration' },
+            { id: 3, label: 'Reach' }, // Renamed
+            { id: 4, label: 'Commitment' }, // Renamed
+            { id: 5, label: 'Role' },
+            { id: 6, label: 'Grade' },
+            { id: 7, label: 'Review' } // Renamed
         ];
 
         // Standard form data object
